@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<head>
+<title>fiesta time</title>
+<meta name="google-site-verification" content="mMT0VNKI4reanZv6GV2FpyAfeaNjKYZ0i8WqghRwZEI" />
+<script src="http://victoriafortune.com/socket.io.js"></script>
+<script src="http://code.jquery.com/jquery-1.4.4.min.js"></script>
+<script>
+    var debug = function (log_txt) {
+        if (window.console != undefined) {
+            console.log(log_txt);
+        }
+    }
+
+    $(document).ready(function(){
+        $('body').append('<a href="'+window.location+'">'+window.location+'</a>');
+        $('h1').live('click',function(){
+            var Obj = {};
+            Obj.message = $(this).html()
+            socket.send(JSON.stringify(Obj));
+            if(/^c.*/.test($(this).text()))
+            {
+                $(this).remove();   
+            }
+        });
+        $('body').mousemove(function(e){
+            var Obj ={};
+            Obj.x = e.pageX;
+            Obj.y = e.pageY;
+            socket.send(JSON.stringify(Obj));
+        });
+       /* delete localStorage.user;
+        if(!localStorage.user)
+        {
+            socket.send(JSON.strigify({'request':'user'});
+        }*/
+    });
+    
+    socket = new io.Socket('74.207.253.119');
+    socket.connect();
+    socket.on('connect', function(){ $('body').append('<div>connected</div>'); });
+    socket.on('message', function(data){ 
+        var Obj = JSON.parse(data);
+        debug('received: ' + JSON.stringify(Obj));
+        if(Obj.x && Obj.y && Obj.id)
+        {
+            $('#'+Obj.id).css({top:Obj.y,left:Obj.x});
+        }
+        /*else if(Obj.user)
+        {
+               localStorage.user
+        }*/
+        else if(Obj.close)
+        {
+            $('body').html('<h2>you lose</h2>');
+            self.close();   
+        }
+        else if(Obj.remove)
+        {
+            $('#'+Obj.remove).remove(); 
+        }
+        else if(Obj.id)
+        {
+            var header = '<h1 class=mouse id='+Obj.id+'>'+Obj.id+'</h1>';
+            $('body').append(header); 
+        }
+        else if(Obj.message)
+        {
+            $('body').append('<div>'+Obj.message+'<div>'); 
+        }
+        
+    });
+    socket.send(JSON.stringify({'message':'some data'}));
+</script>
+<style>
+    .mouse {
+        position:absolute;
+        font-size:0.7em;
+        display:block;
+        border-radius:8px;
+        text-shadow: 0px 0px 10px #EEE;
+        -moz-box-shadow: 0px 0px 5px #888;
+        -webkit-box-shadow: 0px 0px 5px #888;
+        box-shadow: 0px 0px 5px #888;
+        padding:0.5em;
+    }
+    html, body {
+        height:100%;
+        width:100%;
+    }
+</style>
+</head>
+<body>
+<h1>Hello world</h1>
+<h1>list</h1>
+</body>
